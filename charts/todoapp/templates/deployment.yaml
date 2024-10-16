@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "todo-app.fullname" . }}
+  labels:
+    app: {{ include "todo-app.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "todo-app.name" . }}
+  template:
+    metadata:
+      labels:
+        app: todo-app
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        hostNetwork: true
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.livenessPort }}
+          periodSeconds: 10
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "todo-app.fullname" . }}
+              key: DATABASE_URL
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}

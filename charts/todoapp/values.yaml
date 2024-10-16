@@ -1,0 +1,20 @@
+replicaCount: 1
+
+livenessPort: 80
+
+image:
+  repository: todoapp
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+postgres:
+  username: username
+  password: password
+  host: postgres
+  db: mydatabase
+
+resources: {}

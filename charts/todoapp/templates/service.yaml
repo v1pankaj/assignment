@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo-app.fullname" . }}
+  labels:
+    app: {{ include "todo-app.name" . }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: web
+      port: {{ .Values.service.port }}
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: {{ include "todo-app.name" . }}

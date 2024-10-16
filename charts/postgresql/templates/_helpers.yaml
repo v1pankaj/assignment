@@ -1,0 +1,13 @@
+{{/*
+Expand the name of the chart.
+*/}}
+{{- define "postgresql.name" -}}
+{{ .Chart.Name }}
+{{- end }}
+
+{{/*
+Expand the full name of the chart.
+*/}}
+{{- define "postgresql.fullname" -}}
+{{ .Release.Name }}-{{ .Chart.Name }}
+{{- end }}

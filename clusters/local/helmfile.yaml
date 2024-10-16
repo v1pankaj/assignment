@@ -7,6 +7,31 @@ releases:
     namespace: observability
     chart: prometheus-community/kube-prometheus-stack
     disableValidationOnInstall: true
+    values:
+      - namespaceOverride: observability
+      - prometheusOperator:
+          namespaces: 
+            releaseNamespace: true
+            additional:
+              - kube-system
+              - todoapp
+
+  - name: postgresql
+    namespace: todoapp
+    chart: ../../charts/postgresql
+      
+  - name: todoapp
+    namespace: todoapp
+    chart: ../../charts/todoapp
+    values:
+    - service:
+        port: 80
+    - postgres:
+        username: myuser
+        database: mydatabase
+        password: mypassword
+        host: postgresql
+
 
 helmDefaults:
   timeout: 900

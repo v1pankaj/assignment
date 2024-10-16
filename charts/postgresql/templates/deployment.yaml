@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ include "postgresql.fullname" . }}
+  labels:
+    app: {{ include "postgresql.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "postgresql.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "postgresql.name" . }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "{{ .Values.env.POSTGRES_USER }}"
+            - name: POSTGRES_USER
+              value: "{{ .Values.env.POSTGRES_USER }}"
+            - name: POSTGRES_PASSWORD
+              value: "{{ .Values.env.POSTGRES_USER }}"
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}
