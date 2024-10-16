@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #app {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .todo-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        .todo-item button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .todo-item button:hover {
+            background-color: #c0392b;
+        }
+        .todo-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <h1>Todo App</h1>
+        <input type="text" id="newTodoInput" class="todo-input" placeholder="Add a new todo..." />
+        <button onclick="addTodo()">Add Todo</button>
+        <ul id="todoList"></ul>
+    </div>
+
+    <script>
+        const apiUrl = 'http://localhost:8080'; // Change this to your API endpoint
+
+        // Fetch and display todos on load
+        document.addEventListener("DOMContentLoaded", fetchTodos);
+
+        async function fetchTodos() {
+            const response = await fetch(`${apiUrl}/todos`);
+            const todos = await response.json();
+            const todoList = document.getElementById("todoList");
+
+            todoList.innerHTML = ""; // Clear the list
+
+            todos.forEach(todo => {
+                const todoItem = document.createElement("li");
+                todoItem.classList.add("todo-item");
+
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.checked = todo.completed;
+                checkbox.onchange = () => toggleTodoCompletion(todo.id, checkbox.checked);
+
+                const todoText = document.createElement("span");
+                todoText.textContent = todo.title;
+
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Delete";
+                deleteButton.onclick = () => deleteTodo(todo.id);
+
+                todoItem.appendChild(checkbox);
+                todoItem.appendChild(todoText);
+                todoItem.appendChild(deleteButton);
+                todoList.appendChild(todoItem);
+            });
+        }
+
+        async function addTodo() {
+            const input = document.getElementById("newTodoInput");
+            const title = input.value.trim();
+            if (title === "") {
+                alert("Todo title cannot be empty.");
+                return;
+            }
+
+            const response = await fetch(`${apiUrl}/todos`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title })
+            });
+
+            if (response.ok) {
+                input.value = ""; // Clear the input field
+                fetchTodos(); // Refresh the list
+            } else {
+                alert("Error adding todo");
+            }
+        }
+
+        async function toggleTodoCompletion(id, completed) {
+            const response = await fetch(`${apiUrl}/todos/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ completed })
+            });
+
+            if (!response.ok) {
+                alert("Error updating todo");
+            }
+        }
+
+        async function deleteTodo(id) {
+            const response = await fetch(`${apiUrl}/todos/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                fetchTodos(); // Refresh the list
+            } else {
+                alert("Error deleting todo");
+            }
+        }
+    </script>
+
+</body>
+</html>
